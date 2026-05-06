@@ -1,0 +1,12 @@
+This project includes code derived from micropython-async-websocket-client,
+licensed under the Apache License, Version 2.0.
+
+Original source:
+https://pypi.org/project/micropython-async-websocket-client/
+
+The original distribution did not include a specific copyright
+notice in the source files. Existing license notices have been preserved.
+
+Modifications by Arnold Ho, 2026.
+Files derived from micropython-async-websocket-client remain licensed under Apache-2.0.
+All other original files in this project are licensed under MIT.
