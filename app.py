@@ -1,4 +1,3 @@
-from setup import SetUpWiznetChip
 import asyncio, gc
 import ota
 from ws import AsyncWebsocketClient
@@ -18,7 +17,7 @@ def setup():
                  
     # MQTT + WebSocket Setup
     schema = 'https' if config.get('is_secure') else 'http'
-    OTA_LINK = f"{schema}://ai.w5500.com/xiaozhi/ota/"
+    OTA_LINK = schema + "://ai.w5500.com/xiaozhi/ota/"
     OTA_PAYLOAD = ota.get_data_from_ota_using_request(OTA_LINK, device.mac_address)
     if not OTA_PAYLOAD:
         print('Error in OTA')

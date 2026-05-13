@@ -86,7 +86,7 @@ class I2SDevice:
                 bits=16,
                 format= I2S.MONO if self.channels == 1 else I2S.STEREO,
                 rate= 16000,
-                ibuf= 3000
+                ibuf= 6000
             )
         self.sreader = asyncio.StreamReader(self.target)
     
@@ -128,7 +128,7 @@ class I2SDevice:
     async def a_record_audio(self):
         assert self.mode == _MODE_MICROPHONE
         self.device.ws.do_record = True
-        buf = bytearray(1024)
+        buf = bytearray(2048)
         mv = memoryview(buf)
         print('==== Start Recording ====')
         try:
@@ -140,6 +140,7 @@ class I2SDevice:
                 n = await self.sreader.readinto(mv)
                 
                 if await self.device.ws.open():
+                    gc.collect()
                     await self.device.ws.send(mv[:n])
         except OSError as e:
             self.device.ws.do_record = False

@@ -22,7 +22,7 @@ import re
 import struct
 
 # Amended for w55mh32-xiaozhi
-import gc
+import gc, time
 from i2s_microphone_speaker_switch import RATIO_BYTES_WS_TO_RING
 # import ssl
 
@@ -253,7 +253,6 @@ class AsyncWebsocketClient:
         elif length < (1 << 64):
             byte2 |= 127  # Magic code
             self.sock.write(struct.pack('!BBQ', byte1, byte2, length))
-
         else:
             raise ValueError()
 
@@ -263,14 +262,11 @@ class AsyncWebsocketClient:
             
             # Memory view for Recording, amended for w55mh32-xiaozhi
             if isinstance(data, memoryview) and self.do_record:
-                for i in range(length):
-                    data[i] ^= mask_bits[i % 4]
+                self.mask_recording_data(data, mask_bits)
             else:
                 data = bytes(b ^ mask_bits[i % 4]
                          for i, b in enumerate(data))
-        
         self.sock.write(data)
-
     async def recv(self):
         while await self.open():
             try:
@@ -346,3 +342,29 @@ class AsyncWebsocketClient:
         self.device.i2s_device.packets += 1
         self.device.i2s_device.increment_write_index()
         return b''
+    
+    # Custom masking function to reduce latency, amended for w55mh32-xiaozhi
+    def mask_recording_data(self, data, mask_bits):
+        # Custom masking algo to allow faster? time
+        m0 = mask_bits[0]
+        m1 = mask_bits[1]
+        m2 = mask_bits[2]
+        m3 = mask_bits[3]
+    
+        i = 0
+        length = len(data)
+        while i + 3 < length:
+            data[i] ^= m0
+            data[i + 1] ^= m1
+            data[i + 2] ^= m2
+            data[i + 3] ^= m3
+            i += 4
+
+        if i < length:
+            data[i] ^= m0
+            i += 1
+        if i < length:
+            data[i] ^= m1
+            i += 1
+        if i < length:
+            data[i] ^= m2
