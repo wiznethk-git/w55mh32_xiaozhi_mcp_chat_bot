@@ -24,11 +24,14 @@ def get_data_from_ota_using_request(url, mac_addr):
     gc.collect()
     sock = urequest.urlopen(url, data = json.dumps(payload),  method = 'POST', headers = headers)
     read_data = b''
-    try:
-        read_data = read_data + sock.recv(1024)
-    except OSError:
-        print('Error in reading OTA data')
-        return False
+    while True:
+        try:
+            data = sock.recv(1024)
+            if not data:
+                break
+            read_data = read_data + data
+        except OSError:
+            break
     try:
         payload = json.loads(read_data)
     except ValueError:
